@@ -1,0 +1,60 @@
+## source : https://www.youtube.com/watch?v=ABrO2kdXCWE
+## but I fixed some bugs
+
+## this installs dependancies used to get the dependancies and some sources + build tools
+sudo apt-get update
+sudo apt-get install g++
+sudo apt-get update -y
+sudo apt-get install -y beignet-opencl-icd
+sudo apt-get install mediainfo
+sudo apt-get install libqt5concurrent5 libqt5svg5 libqt5qml5
+sudo add-apt-repository ppa:rvm/smplayer
+sudo apt-get update
+sudo apt-get install smplayer smplayer-themes smplayer-skins
+sudo apt-get install g++ make autoconf automake libtool pkg-config nasm git
+
+## this compiles zimg
+git clone https://github.com/sekrit-twc/zimg.git
+cd zimg 
+./autogen.sh
+./configure
+make -j4
+sudo make install
+
+## this compiles vapoursynth
+cd ..
+sudo apt-get install cython3
+git clone --branch R50 https://github.com/vapoursynth/vapoursynth.git
+cd vapoursynth
+./autogen.sh
+./configure
+make -j4
+sudo make install
+
+## this prepares the compilation for mpv
+cd ..
+sudo ldconfig
+sudo ln -s /usr/local/lib/python3.8/site-packages/vapoursynth.so /usr/lib/python3.8/lib-dynload/vapoursynth.so
+sudo apt-get install libssl-dev libfribidi-dev libluajit-5.1-dev libx264-dev xorg-dev libegl1-mesa-dev libfreetype-dev libfontconfig-dev
+sudo apt-get install libasound2-dev libpulse-dev
+sudo apt-get install python-is-python3
+
+# this fixes the bug "The project was not configured: run "waf configure" first!"
+sudo apt-get install libharfbuzz-dev
+sudo apt-get install python2-minimal
+
+git clone https://github.com/mpv-player/mpv-build.git
+cd mpv-build
+echo --enable-libx264 >> ffmpeg_options
+echo --enable-vapoursynth >> mpv_options
+echo --enable-libmpv-shared >> mpv_options
+
+## This config have to work  
+# git checkout abd0009b7a6ecef7ebc8cd956c494c22b77f0dd3
+## this fixes a bug in the previous branch (https://github.com/mpv-player/mpv-build/issues/150) : 
+# export LDFLAGS=" $(pkg-config --libs fontconfig harfbuzz fribidi)"
+
+
+./rebuild -j4
+sudo ./install
+cd .. 
